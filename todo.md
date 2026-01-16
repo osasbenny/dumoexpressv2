@@ -35,11 +35,11 @@
 - [x] Backend API documentation
 
 ## Deployment
-- [ ] Production build for cPanel
-- [ ] .htaccess file for SPA routing
-- [ ] GitHub repository integration
-- [ ] Commit and push to repository
+- [x] Production build for cPanel
+- [x] .htaccess file for SPA routing
+- [x] GitHub repository integration
+- [x] Commit and push to repository
 
 ## Documentation
-- [ ] Backend API specification
-- [ ] Interactive presentation webpage
+- [x] Backend API specification
+- [x] Interactive presentation webpage
