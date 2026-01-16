@@ -1,7 +1,14 @@
-import { eq } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { 
+  InsertUser, users, 
+  parcels, InsertParcel, Parcel,
+  parcelStatusHistory, InsertParcelStatusHistory, ParcelStatusHistory,
+  bookings, InsertBooking, Booking,
+  contactInquiries, InsertContactInquiry, ContactInquiry
+} from "../drizzle/schema";
 import { ENV } from './_core/env';
+import { nanoid } from 'nanoid';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -89,4 +96,121 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============ Parcel Tracking Queries ============
+
+export async function getParcelByTrackingNumber(trackingNumber: string): Promise<Parcel | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(parcels).where(eq(parcels.trackingNumber, trackingNumber)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getParcelStatusHistory(parcelId: number): Promise<ParcelStatusHistory[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(parcelStatusHistory)
+    .where(eq(parcelStatusHistory.parcelId, parcelId))
+    .orderBy(desc(parcelStatusHistory.timestamp));
+}
+
+export async function createParcel(parcel: Omit<InsertParcel, 'trackingNumber'>): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const trackingNumber = `DE${nanoid(10).toUpperCase()}`;
+  await db.insert(parcels).values({ ...parcel, trackingNumber });
+  
+  // Add initial status history
+  const newParcel = await getParcelByTrackingNumber(trackingNumber);
+  if (newParcel) {
+    await addParcelStatusHistory({
+      parcelId: newParcel.id,
+      status: 'collected',
+      location: 'DumoExpress Hub',
+      description: 'Parcel collected and registered in system'
+    });
+  }
+  
+  return trackingNumber;
+}
+
+export async function addParcelStatusHistory(history: InsertParcelStatusHistory): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.insert(parcelStatusHistory).values(history);
+  
+  // Update parcel status
+  if (history.parcelId) {
+    await db.update(parcels)
+      .set({ status: history.status })
+      .where(eq(parcels.id, history.parcelId));
+  }
+}
+
+export async function getAllParcels(): Promise<Parcel[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(parcels).orderBy(desc(parcels.createdAt));
+}
+
+// ============ Booking Queries ============
+
+export async function createBooking(booking: Omit<InsertBooking, 'bookingRef'>): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const bookingRef = `BK${nanoid(8).toUpperCase()}`;
+  await db.insert(bookings).values({ ...booking, bookingRef });
+  
+  return bookingRef;
+}
+
+export async function getBookingByRef(bookingRef: string): Promise<Booking | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  
+  const result = await db.select().from(bookings).where(eq(bookings.bookingRef, bookingRef)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getAllBookings(): Promise<Booking[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(bookings).orderBy(desc(bookings.createdAt));
+}
+
+export async function updateBookingStatus(bookingRef: string, status: Booking['status']): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(bookings).set({ status }).where(eq(bookings.bookingRef, bookingRef));
+}
+
+// ============ Contact Inquiry Queries ============
+
+export async function createContactInquiry(inquiry: InsertContactInquiry): Promise<number> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const result = await db.insert(contactInquiries).values(inquiry);
+  return Number(result[0].insertId);
+}
+
+export async function getAllContactInquiries(): Promise<ContactInquiry[]> {
+  const db = await getDb();
+  if (!db) return [];
+  
+  return await db.select().from(contactInquiries).orderBy(desc(contactInquiries.createdAt));
+}
+
+export async function updateInquiryStatus(id: number, status: ContactInquiry['status']): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  await db.update(contactInquiries).set({ status }).where(eq(contactInquiries.id, id));
+}
