@@ -46,6 +46,6 @@
 
 
 ## cPanel Deployment Update
-- [ ] Rebuild production dist folder
-- [ ] Include dist folder in GitHub repository
-- [ ] Push updated code to GitHub
+- [x] Rebuild production dist folder
+- [x] Include dist folder in GitHub repository
+- [x] Push updated code to GitHub
