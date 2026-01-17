@@ -751,13 +751,36 @@ var appRouter = router({
       deliveryAddress: z2.string().min(1),
       packageWeight: z2.string().min(1),
       serviceType: z2.enum(["same-day", "next-day", "scheduled", "bulk"]),
-      scheduledDate: z2.date().optional(),
+      scheduledDate: z2.string().optional(),
       specialInstructions: z2.string().optional()
     })).mutation(async ({ input }) => {
-      const bookingRef = await createBooking(input);
+      const bookingData = {
+        ...input,
+        scheduledDate: input.scheduledDate ? new Date(input.scheduledDate) : void 0
+      };
+      const bookingRef = await createBooking(bookingData);
+      const emailContent = `
+New Booking Request - ${bookingRef}
+
+Customer Information:
+Name: ${input.customerName}
+Email: ${input.customerEmail}
+Phone: ${input.customerPhone}
+
+Shipment Details:
+Service Type: ${input.serviceType.toUpperCase()}
+Package Weight: ${input.packageWeight}
+Pickup Address: ${input.pickupAddress}
+Delivery Address: ${input.deliveryAddress}
+${input.scheduledDate ? `Scheduled Date: ${input.scheduledDate}` : ""}
+${input.specialInstructions ? `Special Instructions: ${input.specialInstructions}` : ""}
+
+Booking Reference: ${bookingRef}
+Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
+        `.trim();
       await notifyOwner({
-        title: "New Booking Request",
-        content: `New booking ${bookingRef} from ${input.customerName}. Service: ${input.serviceType}. Pickup: ${input.pickupAddress}`
+        title: `New Booking: ${bookingRef}`,
+        content: emailContent
       });
       return { bookingRef };
     }),
@@ -790,11 +813,22 @@ var appRouter = router({
       message: z2.string().min(1)
     })).mutation(async ({ input }) => {
       const id = await createContactInquiry(input);
-      await notifyOwner({
-        title: "New Contact Inquiry",
-        content: `From: ${input.name} (${input.email})
+      const emailContent = `
+New Contact Inquiry
+
+From: ${input.name}
+Email: ${input.email}
+${input.phone ? `Phone: ${input.phone}` : ""}
 Subject: ${input.subject}
-Message: ${input.message}`
+
+Message:
+${input.message}
+
+Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
+        `.trim();
+      await notifyOwner({
+        title: `Contact Inquiry: ${input.subject}`,
+        content: emailContent
       });
       return { success: true, id };
     }),

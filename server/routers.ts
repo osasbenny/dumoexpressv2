@@ -101,16 +101,44 @@ export const appRouter = router({
         deliveryAddress: z.string().min(1),
         packageWeight: z.string().min(1),
         serviceType: z.enum(['same-day', 'next-day', 'scheduled', 'bulk']),
-        scheduledDate: z.date().optional(),
+        scheduledDate: z.string().optional(),
         specialInstructions: z.string().optional(),
       }))
       .mutation(async ({ input }) => {
-        const bookingRef = await createBooking(input);
-        // Notify owner of new booking
+        // Convert scheduledDate string to Date if provided
+        const bookingData = {
+          ...input,
+          scheduledDate: input.scheduledDate ? new Date(input.scheduledDate) : undefined,
+        };
+        const bookingRef = await createBooking(bookingData);
+        
+        // Send email notification to info@dumoexpress.com
+        const emailContent = `
+New Booking Request - ${bookingRef}
+
+Customer Information:
+Name: ${input.customerName}
+Email: ${input.customerEmail}
+Phone: ${input.customerPhone}
+
+Shipment Details:
+Service Type: ${input.serviceType.toUpperCase()}
+Package Weight: ${input.packageWeight}
+Pickup Address: ${input.pickupAddress}
+Delivery Address: ${input.deliveryAddress}
+${input.scheduledDate ? `Scheduled Date: ${input.scheduledDate}` : ''}
+${input.specialInstructions ? `Special Instructions: ${input.specialInstructions}` : ''}
+
+Booking Reference: ${bookingRef}
+Submitted: ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })}
+        `.trim();
+        
+        // Notify owner
         await notifyOwner({
-          title: 'New Booking Request',
-          content: `New booking ${bookingRef} from ${input.customerName}. Service: ${input.serviceType}. Pickup: ${input.pickupAddress}`
+          title: `New Booking: ${bookingRef}`,
+          content: emailContent
         });
+        
         return { bookingRef };
       }),
     
@@ -152,11 +180,28 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         const id = await createContactInquiry(input);
-        // Notify owner of new inquiry
+        
+        // Send formatted email notification to info@dumoexpress.com
+        const emailContent = `
+New Contact Inquiry
+
+From: ${input.name}
+Email: ${input.email}
+${input.phone ? `Phone: ${input.phone}` : ''}
+Subject: ${input.subject}
+
+Message:
+${input.message}
+
+Submitted: ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })}
+        `.trim();
+        
+        // Notify owner
         await notifyOwner({
-          title: 'New Contact Inquiry',
-          content: `From: ${input.name} (${input.email})\nSubject: ${input.subject}\nMessage: ${input.message}`
+          title: `Contact Inquiry: ${input.subject}`,
+          content: emailContent
         });
+        
         return { success: true, id };
       }),
     

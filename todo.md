@@ -79,3 +79,11 @@ Test Tracking Number: **DE2024DUBAI1**
 - [x] Update Footer links to Shipping Policy
 - [x] Rebuild dist with policy pages
 - [x] Push changes to GitHub
+
+
+## Form Fixes and Email Notifications
+- [x] Fix booking form error (scheduledDate type mismatch)
+- [x] Add email notification to booking form (info@dumoexpress.com)
+- [x] Add email notification to contact form (info@dumoexpress.com)
+- [x] Test all forms (8 tests passed)
+- [ ] Rebuild dist and push to GitHub
