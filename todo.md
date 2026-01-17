@@ -86,4 +86,4 @@ Test Tracking Number: **DE2024DUBAI1**
 - [x] Add email notification to booking form (info@dumoexpress.com)
 - [x] Add email notification to contact form (info@dumoexpress.com)
 - [x] Test all forms (8 tests passed)
-- [ ] Rebuild dist and push to GitHub
+- [x] Rebuild dist and push to GitHub
