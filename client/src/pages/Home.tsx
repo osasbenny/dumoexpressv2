@@ -24,13 +24,13 @@ const services = [
   {
     icon: Truck,
     title: "Same-Day Delivery",
-    description: "Urgent deliveries within hours. Perfect for time-sensitive packages across Malaysia.",
+    description: "Urgent deliveries within hours. Perfect for time-sensitive packages worldwide.",
     color: "bg-blue-50 text-blue-600",
   },
   {
     icon: Package,
     title: "Next-Day Delivery",
-    description: "Reliable overnight delivery to any location in Malaysia. Guaranteed by noon.",
+    description: "Reliable international delivery to any location worldwide. Fast and secure.",
     color: "bg-yellow-50 text-yellow-600",
   },
   {
@@ -48,10 +48,10 @@ const services = [
 ];
 
 const stats = [
-  { value: "50K+", label: "Parcels Delivered" },
+  { value: "100K+", label: "Parcels Delivered" },
   { value: "99.5%", label: "On-Time Delivery" },
-  { value: "500+", label: "Business Partners" },
-  { value: "13", label: "States Covered" },
+  { value: "1000+", label: "Business Partners" },
+  { value: "150+", label: "Countries Served" },
 ];
 
 const features = [
@@ -67,8 +67,8 @@ const features = [
   },
   {
     icon: MapPin,
-    title: "Nationwide Coverage",
-    description: "Delivering to all 13 states and 3 federal territories in Malaysia.",
+    title: "Global Coverage",
+    description: "Delivering to over 150 countries worldwide from our Malaysia hub.",
   },
 ];
 
@@ -122,15 +122,15 @@ export default function Home() {
               <div className="space-y-8">
                 <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  Delivering across Malaysia
+                  Delivering Worldwide from Malaysia
                 </div>
                 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                  Fast & Reliable Courier Services in Malaysia
+                  Fast & Reliable Global Courier Services
                 </h1>
                 
                 <p className="text-lg text-white/80 max-w-xl">
-                  From same-day express to scheduled pickups, we deliver your parcels safely and on time. Track your shipments in real-time, anywhere in Malaysia.
+                  From same-day express to international shipping, we deliver your parcels safely and on time. Track your shipments in real-time, anywhere in the world. Based in Malaysia, serving 150+ countries.
                 </p>
                 
                 <div className="flex flex-col sm:flex-row gap-4">

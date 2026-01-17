@@ -681,6 +681,144 @@ var systemRouter = router({
 
 // server/routers.ts
 import { z as z2 } from "zod";
+
+// server/_core/email.ts
+import nodemailer from "nodemailer";
+var SMTP_CONFIG = {
+  host: "mail.dumoexpress.com",
+  port: 465,
+  secure: true,
+  // use SSL
+  auth: {
+    user: "info@dumoexpress.com",
+    pass: "s#009V72(Byn]{p["
+  }
+};
+var transporter = nodemailer.createTransport(SMTP_CONFIG);
+transporter.verify(function(error, success) {
+  if (error) {
+    console.error("[Email] SMTP connection error:", error);
+  } else {
+    console.log("[Email] SMTP server is ready to send emails");
+  }
+});
+async function sendEmail(options) {
+  try {
+    const mailOptions = {
+      from: '"DumoExpress" <info@dumoexpress.com>',
+      to: options.to,
+      subject: options.subject,
+      text: options.text,
+      html: options.html || options.text.replace(/\n/g, "<br>")
+    };
+    const info = await transporter.sendMail(mailOptions);
+    console.log("[Email] Message sent:", info.messageId);
+    return true;
+  } catch (error) {
+    console.error("[Email] Failed to send email:", error);
+    return false;
+  }
+}
+async function sendBookingNotification(data) {
+  const subject = `New Booking Request - ${data.bookingRef}`;
+  const text2 = `
+New Booking Request - ${data.bookingRef}
+
+Customer Information:
+Name: ${data.customerName}
+Email: ${data.customerEmail}
+Phone: ${data.customerPhone}
+
+Shipment Details:
+Service Type: ${data.serviceType.toUpperCase()}
+Package Weight: ${data.packageWeight}
+Pickup Address: ${data.pickupAddress}
+Delivery Address: ${data.deliveryAddress}
+${data.scheduledDate ? `Scheduled Date: ${data.scheduledDate}` : ""}
+${data.specialInstructions ? `Special Instructions: ${data.specialInstructions}` : ""}
+
+Booking Reference: ${data.bookingRef}
+Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
+  `.trim();
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #0066cc;">New Booking Request - ${data.bookingRef}</h2>
+      
+      <h3 style="color: #333;">Customer Information</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Name:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.customerName}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Email:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.customerEmail}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Phone:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.customerPhone}</td></tr>
+      </table>
+      
+      <h3 style="color: #333; margin-top: 20px;">Shipment Details</h3>
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Service Type:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.serviceType.toUpperCase()}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Package Weight:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.packageWeight}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Pickup Address:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.pickupAddress}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Delivery Address:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.deliveryAddress}</td></tr>
+        ${data.scheduledDate ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Scheduled Date:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.scheduledDate}</td></tr>` : ""}
+        ${data.specialInstructions ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Special Instructions:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.specialInstructions}</td></tr>` : ""}
+      </table>
+      
+      <p style="margin-top: 20px; padding: 15px; background-color: #f0f8ff; border-left: 4px solid #0066cc;">
+        <strong>Booking Reference:</strong> ${data.bookingRef}<br>
+        <strong>Submitted:</strong> ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
+      </p>
+    </div>
+  `;
+  return await sendEmail({
+    to: "info@dumoexpress.com",
+    subject,
+    text: text2,
+    html
+  });
+}
+async function sendContactNotification(data) {
+  const emailSubject = `Contact Inquiry: ${data.subject}`;
+  const text2 = `
+New Contact Inquiry
+
+From: ${data.name}
+Email: ${data.email}
+${data.phone ? `Phone: ${data.phone}` : ""}
+Subject: ${data.subject}
+
+Message:
+${data.message}
+
+Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
+  `.trim();
+  const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #0066cc;">New Contact Inquiry</h2>
+      
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>From:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.name}</td></tr>
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Email:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.email}</td></tr>
+        ${data.phone ? `<tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Phone:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.phone}</td></tr>` : ""}
+        <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>Subject:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${data.subject}</td></tr>
+      </table>
+      
+      <div style="padding: 15px; background-color: #f9f9f9; border-radius: 5px; margin-bottom: 20px;">
+        <h3 style="color: #333; margin-top: 0;">Message:</h3>
+        <p style="white-space: pre-wrap;">${data.message}</p>
+      </div>
+      
+      <p style="color: #666; font-size: 12px;">
+        Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
+      </p>
+    </div>
+  `;
+  return await sendEmail({
+    to: "info@dumoexpress.com",
+    subject: emailSubject,
+    text: text2,
+    html
+  });
+}
+
+// server/routers.ts
 var appRouter = router({
   // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
@@ -759,28 +897,17 @@ var appRouter = router({
         scheduledDate: input.scheduledDate ? new Date(input.scheduledDate) : void 0
       };
       const bookingRef = await createBooking(bookingData);
-      const emailContent = `
-New Booking Request - ${bookingRef}
-
-Customer Information:
-Name: ${input.customerName}
-Email: ${input.customerEmail}
-Phone: ${input.customerPhone}
-
-Shipment Details:
-Service Type: ${input.serviceType.toUpperCase()}
-Package Weight: ${input.packageWeight}
-Pickup Address: ${input.pickupAddress}
-Delivery Address: ${input.deliveryAddress}
-${input.scheduledDate ? `Scheduled Date: ${input.scheduledDate}` : ""}
-${input.specialInstructions ? `Special Instructions: ${input.specialInstructions}` : ""}
-
-Booking Reference: ${bookingRef}
-Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
-        `.trim();
-      await notifyOwner({
-        title: `New Booking: ${bookingRef}`,
-        content: emailContent
+      await sendBookingNotification({
+        bookingRef,
+        customerName: input.customerName,
+        customerEmail: input.customerEmail,
+        customerPhone: input.customerPhone,
+        serviceType: input.serviceType,
+        packageWeight: input.packageWeight,
+        pickupAddress: input.pickupAddress,
+        deliveryAddress: input.deliveryAddress,
+        scheduledDate: input.scheduledDate,
+        specialInstructions: input.specialInstructions
       });
       return { bookingRef };
     }),
@@ -813,22 +940,12 @@ Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "A
       message: z2.string().min(1)
     })).mutation(async ({ input }) => {
       const id = await createContactInquiry(input);
-      const emailContent = `
-New Contact Inquiry
-
-From: ${input.name}
-Email: ${input.email}
-${input.phone ? `Phone: ${input.phone}` : ""}
-Subject: ${input.subject}
-
-Message:
-${input.message}
-
-Submitted: ${(/* @__PURE__ */ new Date()).toLocaleString("en-MY", { timeZone: "Asia/Kuala_Lumpur" })}
-        `.trim();
-      await notifyOwner({
-        title: `Contact Inquiry: ${input.subject}`,
-        content: emailContent
+      await sendContactNotification({
+        name: input.name,
+        email: input.email,
+        phone: input.phone,
+        subject: input.subject,
+        message: input.message
       });
       return { success: true, id };
     }),

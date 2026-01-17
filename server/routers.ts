@@ -18,6 +18,7 @@ import {
   addParcelStatusHistory
 } from "./db";
 import { notifyOwner } from "./_core/notification";
+import { sendBookingNotification, sendContactNotification } from "./_core/email";
 
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
@@ -112,31 +113,18 @@ export const appRouter = router({
         };
         const bookingRef = await createBooking(bookingData);
         
-        // Send email notification to info@dumoexpress.com
-        const emailContent = `
-New Booking Request - ${bookingRef}
-
-Customer Information:
-Name: ${input.customerName}
-Email: ${input.customerEmail}
-Phone: ${input.customerPhone}
-
-Shipment Details:
-Service Type: ${input.serviceType.toUpperCase()}
-Package Weight: ${input.packageWeight}
-Pickup Address: ${input.pickupAddress}
-Delivery Address: ${input.deliveryAddress}
-${input.scheduledDate ? `Scheduled Date: ${input.scheduledDate}` : ''}
-${input.specialInstructions ? `Special Instructions: ${input.specialInstructions}` : ''}
-
-Booking Reference: ${bookingRef}
-Submitted: ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })}
-        `.trim();
-        
-        // Notify owner
-        await notifyOwner({
-          title: `New Booking: ${bookingRef}`,
-          content: emailContent
+        // Send SMTP email notification to info@dumoexpress.com
+        await sendBookingNotification({
+          bookingRef,
+          customerName: input.customerName,
+          customerEmail: input.customerEmail,
+          customerPhone: input.customerPhone,
+          serviceType: input.serviceType,
+          packageWeight: input.packageWeight,
+          pickupAddress: input.pickupAddress,
+          deliveryAddress: input.deliveryAddress,
+          scheduledDate: input.scheduledDate,
+          specialInstructions: input.specialInstructions,
         });
         
         return { bookingRef };
@@ -181,25 +169,13 @@ Submitted: ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' 
       .mutation(async ({ input }) => {
         const id = await createContactInquiry(input);
         
-        // Send formatted email notification to info@dumoexpress.com
-        const emailContent = `
-New Contact Inquiry
-
-From: ${input.name}
-Email: ${input.email}
-${input.phone ? `Phone: ${input.phone}` : ''}
-Subject: ${input.subject}
-
-Message:
-${input.message}
-
-Submitted: ${new Date().toLocaleString('en-MY', { timeZone: 'Asia/Kuala_Lumpur' })}
-        `.trim();
-        
-        // Notify owner
-        await notifyOwner({
-          title: `Contact Inquiry: ${input.subject}`,
-          content: emailContent
+        // Send SMTP email notification to info@dumoexpress.com
+        await sendContactNotification({
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+          subject: input.subject,
+          message: input.message,
         });
         
         return { success: true, id };

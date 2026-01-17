@@ -29,18 +29,18 @@ const values = [
   },
   {
     icon: MapPin,
-    title: "Nationwide Coverage",
-    description: "From Perlis to Sabah, we deliver to every corner of Malaysia. No destination is too far for DumoExpress.",
+    title: "Global Coverage",
+    description: "From Malaysia to over 150 countries worldwide. No destination is too far for DumoExpress.",
   },
 ];
 
 const milestones = [
   { year: "2018", title: "Founded", description: "DumoExpress started operations in Kuala Lumpur" },
   { year: "2019", title: "Expansion", description: "Extended services to Selangor and Penang" },
-  { year: "2020", title: "Nationwide", description: "Achieved coverage across all 13 states" },
-  { year: "2021", title: "50K Deliveries", description: "Milestone of 50,000 successful deliveries" },
-  { year: "2022", title: "Tech Upgrade", description: "Launched real-time tracking system" },
-  { year: "2023", title: "Business Solutions", description: "Introduced bulk shipment services" },
+  { year: "2020", title: "Nationwide", description: "Achieved coverage across all 13 Malaysian states" },
+  { year: "2021", title: "International Expansion", description: "Launched services to 50+ countries" },
+  { year: "2022", title: "Global Network", description: "Expanded to 150+ countries worldwide" },
+  { year: "2023", title: "100K Deliveries", description: "Milestone of 100,000 global deliveries" },
 ];
 
 const team = [
@@ -75,7 +75,7 @@ export default function About() {
                 About DumoExpress
               </h1>
               <p className="text-xl text-white/80 leading-relaxed">
-                We're on a mission to revolutionize courier services in Malaysia. Since 2018, we've been delivering trust, speed, and reliability to thousands of customers across the nation.
+                We're on a mission to revolutionize global courier services. Since 2018, we've been delivering trust, speed, and reliability to thousands of customers worldwide from our Malaysia hub.
               </p>
             </div>
           </div>
@@ -101,7 +101,7 @@ export default function About() {
                   </div>
                   <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>Our Mission</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    To provide fast, reliable, and affordable courier services that connect businesses and individuals across Malaysia. We strive to make every delivery a seamless experience, ensuring your parcels arrive safely and on time.
+                    To provide fast, reliable, and affordable global courier services that connect businesses and individuals worldwide. Based in Malaysia, we strive to make every international delivery a seamless experience, ensuring your parcels arrive safely and on time.
                   </p>
                 </CardContent>
               </Card>
@@ -113,7 +113,7 @@ export default function About() {
                   </div>
                   <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>Our Vision</h2>
                   <p className="text-muted-foreground leading-relaxed">
-                    To become Malaysia's most trusted courier service, known for innovation, customer satisfaction, and sustainable delivery practices. We envision a future where every Malaysian has access to world-class logistics services.
+                    To become the world's most trusted global courier service, known for innovation, customer satisfaction, and sustainable delivery practices. We envision a future where businesses and individuals worldwide have access to seamless international logistics.
                   </p>
                 </CardContent>
               </Card>
@@ -155,7 +155,7 @@ export default function About() {
                 Our Journey
               </h2>
               <p className="text-muted-foreground text-lg">
-                From a small startup to a nationwide courier service.
+                From a small startup in Malaysia to a global courier service.
               </p>
             </div>
             
@@ -189,16 +189,16 @@ export default function About() {
           <div className="container">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
               <div>
-                <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>50K+</div>
+                <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>100K+</div>
                 <div className="text-white/70">Parcels Delivered</div>
               </div>
               <div>
-                <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>500+</div>
+                <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>1000+</div>
                 <div className="text-white/70">Business Partners</div>
               </div>
               <div>
-                <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>13</div>
-                <div className="text-white/70">States Covered</div>
+                <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>150+</div>
+                <div className="text-white/70">Countries Served</div>
               </div>
               <div>
                 <div className="text-4xl lg:text-5xl font-bold mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>99.5%</div>

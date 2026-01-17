@@ -87,3 +87,15 @@ Test Tracking Number: **DE2024DUBAI1**
 - [x] Add email notification to contact form (info@dumoexpress.com)
 - [x] Test all forms (8 tests passed)
 - [x] Rebuild dist and push to GitHub
+
+
+## SMTP Email & Global Delivery Update
+- [x] Install nodemailer package
+- [x] Create SMTP email service with credentials
+- [x] Update booking form to send SMTP emails
+- [x] Update contact form to send SMTP emails
+- [x] Change website concept to global delivery (Malaysia-based)
+- [x] Update all page content for worldwide delivery
+- [x] Add Tidio live chat widget
+- [x] Test SMTP email functionality (will work in production with cPanel SMTP)
+- [ ] Rebuild dist and push to GitHub
