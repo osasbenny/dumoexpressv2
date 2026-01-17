@@ -49,3 +49,23 @@
 - [x] Rebuild production dist folder
 - [x] Include dist folder in GitHub repository
 - [x] Push updated code to GitHub
+
+
+## Website Images Update
+- [x] Add hero section image (delivery truck/courier)
+- [x] Add About Us section images (team, warehouse)
+- [x] Add Services section images (same-day, next-day, scheduled, bulk)
+- [x] Add Tracking page image
+- [x] Add Contact page image (customer service)
+- [x] Add Pricing page image
+
+## Test Tracking Data
+- [x] Create test tracking number for Dubai delivery
+- [x] Add tracking history with status updates
+
+Test Tracking Number: **DE2024DUBAI1**
+- Sender: Ahmad Hassan (Kuala Lumpur, Malaysia)
+- Receiver: Mohammed Al-Rashid (Dubai Marina, UAE)
+- Status: In Transit
+- Service: Next-Day Delivery
+- Weight: 2.5kg

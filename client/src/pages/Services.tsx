@@ -20,6 +20,7 @@ const services = [
   {
     id: "same-day",
     icon: Truck,
+    image: "/images/delivery-person.jpg",
     title: "Same-Day Delivery",
     subtitle: "Urgent deliveries within hours",
     description: "When time is critical, our same-day delivery service ensures your parcels reach their destination within hours. Perfect for urgent documents, time-sensitive products, and last-minute gifts.",
@@ -39,6 +40,7 @@ const services = [
   {
     id: "next-day",
     icon: Package,
+    image: "/images/delivery-truck.jpg",
     title: "Next-Day Delivery",
     subtitle: "Reliable overnight shipping",
     description: "Our most popular service for businesses and individuals. Ship today, deliver tomorrow. Guaranteed delivery by noon the next business day to major cities across Malaysia.",
@@ -58,6 +60,7 @@ const services = [
   {
     id: "scheduled",
     icon: Clock,
+    image: "/images/courier-smiling.jpg",
     title: "Scheduled Pickup & Delivery",
     subtitle: "Plan your deliveries in advance",
     description: "Perfect for regular shipments and planned deliveries. Schedule pickups and deliveries at your convenience. Ideal for subscription boxes, regular business shipments, and recurring orders.",
@@ -77,6 +80,7 @@ const services = [
   {
     id: "bulk",
     icon: Building2,
+    image: "/images/bulk-shipping.webp",
     title: "Business Bulk Shipments",
     subtitle: "Volume solutions for enterprises",
     description: "Tailored logistics solutions for businesses with high-volume shipping needs. Enjoy dedicated account management, volume discounts, and customized delivery schedules.",
@@ -149,9 +153,20 @@ export default function Services() {
                   className={`scroll-mt-24 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}
                 >
                   <Card className="overflow-hidden border-2 hover:border-primary/20 transition-colors">
-                    <div className="grid lg:grid-cols-2">
+                    <div className={`grid lg:grid-cols-2 ${index % 2 === 1 ? 'lg:flex-row-reverse' : ''}`}>
+                      {/* Image Side */}
+                      <div className={`relative h-64 lg:h-auto ${index % 2 === 1 ? 'lg:order-2' : ''}`}>
+                        <img 
+                          src={service.image} 
+                          alt={service.title} 
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                      </div>
+                      
                       {/* Content Side */}
-                      <CardContent className="p-8 lg:p-12">
+                      <div className={`${index % 2 === 1 ? 'lg:order-1' : ''}`}>
+                        <CardContent className="p-8 lg:p-12">
                         <div className={`w-16 h-16 rounded-2xl ${service.bgColor} flex items-center justify-center mb-6`}>
                           <service.icon className={`h-8 w-8 ${service.textColor}`} />
                         </div>
@@ -172,6 +187,7 @@ export default function Services() {
                           </Button>
                         </Link>
                       </CardContent>
+                      </div>
                       
                       {/* Features Side */}
                       <div className={`${service.bgColor} p-8 lg:p-12`}>

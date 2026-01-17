@@ -81,9 +81,18 @@ export default function About() {
           </div>
         </section>
 
-        {/* Mission & Vision */}
+        {/* Warehouse Image */}
         <section className="py-16 lg:py-24">
           <div className="container">
+            <div className="mb-12">
+              <img 
+                src="/images/warehouse.jpg" 
+                alt="DumoExpress warehouse operations" 
+                className="w-full h-[400px] object-cover rounded-2xl shadow-xl"
+              />
+            </div>
+            
+            {/* Mission & Vision */}
             <div className="grid lg:grid-cols-2 gap-12">
               <Card className="border-2 border-primary/20">
                 <CardContent className="p-8">

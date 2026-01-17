@@ -149,7 +149,21 @@ export default function Home() {
                 </div>
               </div>
               
-              {/* Quick Track Box */}
+              {/* Hero Image */}
+              <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                <img 
+                  src="/images/delivery-truck.jpg" 
+                  alt="DumoExpress delivery truck" 
+                  className="w-full h-[400px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick Track Box - Moved below hero */}
+          <div className="container relative -mt-8 pb-8">
+            <div className="max-w-2xl mx-auto">
               <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-2xl">
                 <h2 className="text-xl font-semibold text-gray-900 mb-4">Track Your Parcel</h2>
                 <form onSubmit={handleTrack} className="space-y-4">
@@ -269,6 +283,11 @@ export default function Home() {
               </div>
               
               <div className="relative">
+                <img 
+                  src="/images/delivery-person.jpg" 
+                  alt="Smiling delivery person" 
+                  className="w-full h-[400px] object-cover rounded-2xl shadow-xl mb-6"
+                />
                 <div className="bg-white rounded-2xl p-8 shadow-xl">
                   <div className="space-y-4">
                     <div className="flex items-center gap-3 p-4 bg-green-50 rounded-lg">

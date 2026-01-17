@@ -86,8 +86,12 @@ export default function Tracking() {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[oklch(0.45_0.15_250)] to-[oklch(0.35_0.12_250)] text-white py-16 lg:py-20">
-          <div className="container">
+        <section className="relative bg-gradient-to-br from-[oklch(0.45_0.15_250)] to-[oklch(0.35_0.12_250)] text-white py-16 lg:py-20 overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
+            <img src="/images/tracking-app.jpg" alt="Tracking app" className="w-full h-full object-cover" />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.45_0.15_250)] via-[oklch(0.45_0.15_250)]/90 to-[oklch(0.35_0.12_250)]/80" />
+          <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 Track Your Parcel
