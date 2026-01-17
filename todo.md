@@ -98,4 +98,4 @@ Test Tracking Number: **DE2024DUBAI1**
 - [x] Update all page content for worldwide delivery
 - [x] Add Tidio live chat widget
 - [x] Test SMTP email functionality (will work in production with cPanel SMTP)
-- [ ] Rebuild dist and push to GitHub
+- [x] Rebuild dist and push to GitHub
