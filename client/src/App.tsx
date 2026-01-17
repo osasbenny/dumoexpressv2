@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 import Booking from "./pages/Booking";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import ShippingPolicy from "./pages/ShippingPolicy";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/booking" component={Booking} />
       <Route path="/terms" component={Terms} />
       <Route path="/privacy" component={Privacy} />
+      <Route path="/shipping-policy" component={ShippingPolicy} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

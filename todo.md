@@ -69,3 +69,13 @@ Test Tracking Number: **DE2024DUBAI1**
 - Status: In Transit
 - Service: Next-Day Delivery
 - Weight: 2.5kg
+
+
+## Policy Pages Update
+- [x] Write comprehensive Terms of Service content
+- [x] Write comprehensive Privacy Policy content
+- [x] Create Shipping Policy page and content
+- [x] Add Shipping Policy route to App.tsx
+- [x] Update Footer links to Shipping Policy
+- [ ] Rebuild dist with policy pages
+- [ ] Push changes to GitHub
