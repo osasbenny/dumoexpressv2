@@ -60,7 +60,7 @@
         "weight": "5.0kg"
       },
       "serviceType": "48hrs",
-      "status": "Out For Delivery",
+      "status": "Out for Delivery",
       "createdAt": "2026-01-23T10:00:00Z",
       "estimatedDelivery": "2026-01-26T18:00:00Z",
       "history": [
@@ -77,7 +77,7 @@
           "description": "Parcel sorted and prepared for international shipment"
         },
         {
-          "status": "Out For Delivery",
+          "status": "Out for Delivery",
           "timestamp": "2026-01-26T09:00:00Z",
           "location": "Ontario Distribution Center",
           "description": "Parcel is out for local delivery"
