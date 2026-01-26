@@ -281,21 +281,13 @@ export default function Booking() {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label htmlFor="packageWeight">Package Weight *</Label>
-                          <Select 
-                            value={formData.packageWeight} 
-                            onValueChange={(value) => handleChange("packageWeight", value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select weight range" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {weightOptions.map((weight) => (
-                                <SelectItem key={weight} value={weight}>
-                                  {weight}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <Input
+                            id="packageWeight"
+                            placeholder="e.g., 2.5 kg, 500g, 1 lb"
+                            value={formData.packageWeight}
+                            onChange={(e) => handleChange("packageWeight", e.target.value)}
+                            required
+                          />
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="specialInstructions">Special Instructions</Label>

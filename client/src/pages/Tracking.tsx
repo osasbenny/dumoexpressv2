@@ -110,7 +110,7 @@ export default function Tracking() {
         if (parcel) {
           setFoundParcel(parcel);
         } else {
-          setError(`No parcel found with tracking number: ${searchedNumber}`);
+          setError(`No shipment found with tracking or booking number: ${searchedNumber}`);
         }
         setIsLoading(false);
       }, 500);
