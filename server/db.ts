@@ -164,7 +164,7 @@ export async function getAllParcels(): Promise<Parcel[]> {
 export async function createBooking(booking: Omit<InsertBooking, 'bookingRef'>): Promise<string> {
   const db = await getDb();
   
-  const bookingRef = `DE${nanoid(13).toUpperCase()}`; // 15-character format matching parcel tracking
+  const bookingRef = `DES${nanoid(8).toUpperCase()}`; // DES + 8 characters format
   
   // Save to database if available
   if (db) {
