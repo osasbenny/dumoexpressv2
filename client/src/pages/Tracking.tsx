@@ -367,11 +367,7 @@ export default function Tracking() {
                   <p className="text-muted-foreground max-w-md mx-auto">
                     Enter your DumoExpress tracking number above to see the current status and location of your parcel.
                   </p>
-                  <div className="mt-6 text-sm text-muted-foreground">
-                    <p>Test tracking numbers:</p>
-                    <p className="mt-2"><strong>DE2024DUBAI1</strong> - Dubai delivery</p>
-                    <p><strong>RL2024CANADA1</strong> - Canada delivery</p>
-                  </div>
+
                 </CardContent>
               </Card>
             )}
