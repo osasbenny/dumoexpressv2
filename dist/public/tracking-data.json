@@ -1,0 +1,82 @@
+{
+  "shipments": [
+    {
+      "trackingNumber": "DE2024DUBAI1",
+      "sender": {
+        "name": "Ahmad Hassan",
+        "location": "Kuala Lumpur, Malaysia"
+      },
+      "receiver": {
+        "name": "Mohammed Al-Rashid",
+        "address": "Dubai Marina, UAE"
+      },
+      "package": {
+        "description": "Electronics Package",
+        "weight": "2.5kg"
+      },
+      "serviceType": "Next-Day Delivery",
+      "status": "In Transit",
+      "createdAt": "2024-01-15T08:30:00Z",
+      "estimatedDelivery": "2024-01-17T18:00:00Z",
+      "history": [
+        {
+          "status": "Collected",
+          "timestamp": "2024-01-15T09:00:00Z",
+          "location": "KL Central Hub",
+          "description": "Parcel collected from sender"
+        },
+        {
+          "status": "In Transit",
+          "timestamp": "2024-01-15T14:30:00Z",
+          "location": "KLIA Cargo Terminal",
+          "description": "Parcel sorted and loaded for international transit"
+        },
+        {
+          "status": "In Transit",
+          "timestamp": "2024-01-16T06:00:00Z",
+          "location": "Dubai International Airport",
+          "description": "Parcel arrived at destination country"
+        },
+        {
+          "status": "In Transit",
+          "timestamp": "2024-01-16T12:00:00Z",
+          "location": "Dubai Distribution Center",
+          "description": "Parcel in local delivery network"
+        }
+      ]
+    },
+    {
+      "trackingNumber": "RL2024CANADA1",
+      "sender": {
+        "name": "Mr Randy Lucas",
+        "location": "Mediterranean Sea"
+      },
+      "receiver": {
+        "name": "Mrs Johanne Morres",
+        "address": "Iroquois, ON K0E 1K0, Canada"
+      },
+      "package": {
+        "description": "Sealed Carton",
+        "weight": "5.0kg"
+      },
+      "serviceType": "48hrs",
+      "status": "Collected",
+      "createdAt": "2024-01-19T10:00:00Z",
+      "estimatedDelivery": "2024-01-21T18:00:00Z",
+      "history": [
+        {
+          "status": "Collected",
+          "timestamp": "2024-01-19T10:30:00Z",
+          "location": "Mediterranean Collection Point",
+          "description": "Parcel collected from sender at Mediterranean Sea location"
+        },
+        {
+          "status": "In Transit",
+          "timestamp": "2024-01-19T15:00:00Z",
+          "location": "Regional Hub - Europe",
+          "description": "Parcel sorted and prepared for international shipment"
+        }
+      ]
+    }
+  ]
+}

@@ -5,7 +5,6 @@ import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { trpc } from "@/lib/trpc";
 import { 
   Search, 
   Package, 
@@ -18,28 +17,28 @@ import {
 } from "lucide-react";
 
 const statusConfig = {
-  "collected": {
+  "Collected": {
     icon: Package,
     label: "Collected",
     color: "text-blue-600",
     bgColor: "bg-blue-100",
     description: "Parcel has been collected and registered"
   },
-  "in-transit": {
+  "In Transit": {
     icon: Truck,
     label: "In Transit",
     color: "text-yellow-600",
     bgColor: "bg-yellow-100",
     description: "Parcel is on its way to the destination"
   },
-  "out-for-delivery": {
+  "Out for Delivery": {
     icon: MapPin,
     label: "Out for Delivery",
     color: "text-orange-600",
     bgColor: "bg-orange-100",
     description: "Parcel is out for delivery"
   },
-  "delivered": {
+  "Delivered": {
     icon: CheckCircle2,
     label: "Delivered",
     color: "text-green-600",
@@ -48,7 +47,26 @@ const statusConfig = {
   }
 };
 
-const statusOrder = ["collected", "in-transit", "out-for-delivery", "delivered"];
+const statusOrder = ["Collected", "In Transit", "Out for Delivery", "Delivered"];
+
+interface TrackingData {
+  shipments: Array<{
+    trackingNumber: string;
+    sender: { name: string; location: string };
+    receiver: { name: string; address: string };
+    package: { description: string; weight: string };
+    serviceType: string;
+    status: string;
+    createdAt: string;
+    estimatedDelivery: string;
+    history: Array<{
+      status: string;
+      timestamp: string;
+      location: string;
+      description: string;
+    }>;
+  }>;
+}
 
 export default function Tracking() {
   const searchString = useSearch();
@@ -57,11 +75,47 @@ export default function Tracking() {
   
   const [trackingNumber, setTrackingNumber] = useState(initialQuery);
   const [searchedNumber, setSearchedNumber] = useState(initialQuery);
+  const [isLoading, setIsLoading] = useState(false);
+  const [trackingData, setTrackingData] = useState<TrackingData | null>(null);
+  const [foundParcel, setFoundParcel] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data, isLoading, error, refetch } = trpc.tracking.track.useQuery(
-    { trackingNumber: searchedNumber },
-    { enabled: !!searchedNumber }
-  );
+  // Load tracking data on component mount
+  useEffect(() => {
+    const loadTrackingData = async () => {
+      try {
+        const response = await fetch("/tracking-data.json");
+        const data = await response.json();
+        setTrackingData(data);
+      } catch (err) {
+        console.error("Failed to load tracking data:", err);
+      }
+    };
+    loadTrackingData();
+  }, []);
+
+  // Search for parcel when searchedNumber changes
+  useEffect(() => {
+    if (searchedNumber && trackingData) {
+      setIsLoading(true);
+      setError(null);
+      setFoundParcel(null);
+
+      // Simulate search delay for better UX
+      setTimeout(() => {
+        const parcel = trackingData.shipments.find(
+          (s) => s.trackingNumber === searchedNumber.toUpperCase()
+        );
+
+        if (parcel) {
+          setFoundParcel(parcel);
+        } else {
+          setError(`No parcel found with tracking number: ${searchedNumber}`);
+        }
+        setIsLoading(false);
+      }, 500);
+    }
+  }, [searchedNumber, trackingData]);
 
   useEffect(() => {
     if (initialQuery) {
@@ -107,7 +161,7 @@ export default function Tracking() {
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                     <Input
                       type="text"
-                      placeholder="Enter tracking number (e.g., DE1234567890)"
+                      placeholder="Enter tracking number (e.g., DE2024DUBAI1)"
                       className="pl-12 h-14 text-lg border-0 bg-white text-gray-900"
                       value={trackingNumber}
                       onChange={(e) => setTrackingNumber(e.target.value)}
@@ -135,31 +189,21 @@ export default function Tracking() {
             )}
 
             {error && (
-              <Card className="border-red-200 bg-red-50">
-                <CardContent className="py-8 text-center">
-                  <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-red-900 mb-2">Error</h3>
-                  <p className="text-red-700">Something went wrong. Please try again later.</p>
-                </CardContent>
-              </Card>
-            )}
-
-            {data && !data.found && searchedNumber && (
               <Card className="border-yellow-200 bg-yellow-50">
                 <CardContent className="py-8 text-center">
                   <Package className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
                   <h3 className="text-lg font-semibold text-yellow-900 mb-2">Parcel Not Found</h3>
                   <p className="text-yellow-700 mb-4">
-                    We couldn't find a parcel with tracking number <strong>{searchedNumber}</strong>.
+                    {error}
                   </p>
                   <p className="text-sm text-yellow-600">
-                    Please check the tracking number and try again. If you just booked, it may take a few minutes to appear in our system.
+                    Please check the tracking number and try again. Test tracking numbers: DE2024DUBAI1, RL2024CANADA1
                   </p>
                 </CardContent>
               </Card>
             )}
 
-            {data && data.found && data.parcel && (
+            {foundParcel && (
               <div className="space-y-6">
                 {/* Parcel Info Card */}
                 <Card>
@@ -167,11 +211,11 @@ export default function Tracking() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm text-muted-foreground">Tracking Number</p>
-                        <CardTitle className="text-2xl">{data.parcel.trackingNumber}</CardTitle>
+                        <CardTitle className="text-2xl">{foundParcel.trackingNumber}</CardTitle>
                       </div>
-                      <div className={`px-4 py-2 rounded-full ${statusConfig[data.parcel.status as keyof typeof statusConfig]?.bgColor}`}>
-                        <span className={`font-semibold ${statusConfig[data.parcel.status as keyof typeof statusConfig]?.color}`}>
-                          {statusConfig[data.parcel.status as keyof typeof statusConfig]?.label}
+                      <div className={`px-4 py-2 rounded-full ${statusConfig[foundParcel.status as keyof typeof statusConfig]?.bgColor}`}>
+                        <span className={`font-semibold ${statusConfig[foundParcel.status as keyof typeof statusConfig]?.color}`}>
+                          {statusConfig[foundParcel.status as keyof typeof statusConfig]?.label}
                         </span>
                       </div>
                     </div>
@@ -180,34 +224,32 @@ export default function Tracking() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div>
                         <h4 className="font-semibold mb-2">Sender</h4>
-                        <p className="text-muted-foreground">{data.parcel.senderName}</p>
-                        <p className="text-sm text-muted-foreground">{data.parcel.senderAddress}</p>
+                        <p className="text-muted-foreground">{foundParcel.sender.name}</p>
+                        <p className="text-sm text-muted-foreground">{foundParcel.sender.location}</p>
                       </div>
                       <div>
                         <h4 className="font-semibold mb-2">Receiver</h4>
-                        <p className="text-muted-foreground">{data.parcel.receiverName}</p>
-                        <p className="text-sm text-muted-foreground">{data.parcel.receiverAddress}</p>
+                        <p className="text-muted-foreground">{foundParcel.receiver.name}</p>
+                        <p className="text-sm text-muted-foreground">{foundParcel.receiver.address}</p>
                       </div>
                     </div>
                     <div className="mt-6 pt-6 border-t grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="text-muted-foreground">Service Type</p>
-                        <p className="font-medium capitalize">{data.parcel.serviceType.replace('-', ' ')}</p>
+                        <p className="font-medium capitalize">{foundParcel.serviceType}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Weight</p>
-                        <p className="font-medium">{data.parcel.weight}</p>
+                        <p className="font-medium">{foundParcel.package.weight}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Created</p>
-                        <p className="font-medium">{new Date(data.parcel.createdAt).toLocaleDateString()}</p>
+                        <p className="font-medium">{new Date(foundParcel.createdAt).toLocaleDateString()}</p>
                       </div>
-                      {data.parcel.estimatedDelivery && (
-                        <div>
-                          <p className="text-muted-foreground">Est. Delivery</p>
-                          <p className="font-medium">{new Date(data.parcel.estimatedDelivery).toLocaleDateString()}</p>
-                        </div>
-                      )}
+                      <div>
+                        <p className="text-muted-foreground">Est. Delivery</p>
+                        <p className="font-medium">{new Date(foundParcel.estimatedDelivery).toLocaleDateString()}</p>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -224,7 +266,7 @@ export default function Tracking() {
                       <div 
                         className="absolute left-6 top-0 w-0.5 bg-primary transition-all duration-500"
                         style={{ 
-                          height: `${(getCurrentStatusIndex(data.parcel.status) / (statusOrder.length - 1)) * 100}%` 
+                          height: `${(getCurrentStatusIndex(foundParcel.status) / (statusOrder.length - 1)) * 100}%` 
                         }}
                       />
                       
@@ -233,8 +275,8 @@ export default function Tracking() {
                         {statusOrder.map((status, index) => {
                           const config = statusConfig[status as keyof typeof statusConfig];
                           const StatusIcon = config.icon;
-                          const isActive = getCurrentStatusIndex(data.parcel!.status) >= index;
-                          const isCurrent = data.parcel!.status === status;
+                          const isActive = getCurrentStatusIndex(foundParcel.status) >= index;
+                          const isCurrent = foundParcel.status === status;
                           
                           return (
                             <div key={status} className="flex items-start gap-4 relative">
@@ -262,14 +304,14 @@ export default function Tracking() {
                 </Card>
 
                 {/* Status History */}
-                {data.history && data.history.length > 0 && (
+                {foundParcel.history && foundParcel.history.length > 0 && (
                   <Card>
                     <CardHeader>
                       <CardTitle>Tracking History</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
-                        {data.history.map((entry, index) => {
+                        {foundParcel.history.map((entry: any, index: number) => {
                           const config = statusConfig[entry.status as keyof typeof statusConfig];
                           return (
                             <div key={index} className="flex items-start gap-4 pb-4 border-b last:border-0 last:pb-0">
@@ -312,8 +354,9 @@ export default function Tracking() {
                     Enter your DumoExpress tracking number above to see the current status and location of your parcel.
                   </p>
                   <div className="mt-6 text-sm text-muted-foreground">
-                    <p>Tracking numbers start with <strong>DE</strong> followed by 10 characters.</p>
-                    <p className="mt-1">Example: DE1234567890</p>
+                    <p>Test tracking numbers:</p>
+                    <p className="mt-2"><strong>DE2024DUBAI1</strong> - Dubai delivery</p>
+                    <p><strong>RL2024CANADA1</strong> - Canada delivery</p>
                   </div>
                 </CardContent>
               </Card>
@@ -332,7 +375,7 @@ export default function Tracking() {
                 <CardContent className="p-6">
                   <h3 className="font-semibold mb-2">Where can I find my tracking number?</h3>
                   <p className="text-sm text-muted-foreground">
-                    Your tracking number is provided in the confirmation email or SMS sent after booking. It starts with "DE" followed by 10 characters.
+                    Your tracking number is provided in the confirmation email or SMS sent after booking. It starts with "DE" or "RL" followed by numbers.
                   </p>
                 </CardContent>
               </Card>
