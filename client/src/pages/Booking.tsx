@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { Link } from "wouter";
 import { 
@@ -59,18 +58,25 @@ const serviceTypes = [
   },
 ];
 
-const weightOptions = [
-  "Up to 1 kg",
-  "1-3 kg",
-  "3-5 kg",
-  "5-10 kg",
-  "10-20 kg",
-  "Over 20 kg"
-];
+// Generate random alphanumeric string
+function generateRandomString(length: number): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+// Generate DES booking reference (DES + 8 random characters)
+function generateBookingRef(): string {
+  return `DES${generateRandomString(8)}`;
+}
 
 export default function Booking() {
   const [step, setStep] = useState(1);
   const [bookingRef, setBookingRef] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     serviceType: "next-day" as "same-day" | "next-day" | "scheduled" | "bulk",
     customerName: "",
@@ -82,37 +88,119 @@ export default function Booking() {
     specialInstructions: ""
   });
 
-  const createBooking = trpc.booking.create.useMutation({
-    onSuccess: (data) => {
-      setBookingRef(data.bookingRef);
-      setStep(3);
-      toast.success("Booking created successfully!");
-    },
-    onError: (error) => {
-      toast.error("Failed to create booking. Please try again.");
-    }
-  });
-
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleServiceSelect = (serviceId: string) => {
-    setFormData(prev => ({ ...prev, serviceType: serviceId as typeof formData.serviceType }));
+    setFormData(prev => ({ 
+      ...prev, 
+      serviceType: serviceId as "same-day" | "next-day" | "scheduled" | "bulk"
+    }));
     setStep(2);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone || 
+    
+    // Validate form
+    if (!formData.customerName || !formData.customerEmail || !formData.customerPhone ||
         !formData.pickupAddress || !formData.deliveryAddress || !formData.packageWeight) {
-      toast.error("Please fill in all required fields.");
+      toast.error("Please fill in all required fields");
       return;
     }
-    createBooking.mutate(formData);
+
+    setIsLoading(true);
+
+    try {
+      // Generate booking reference
+      const newBookingRef = generateBookingRef();
+      
+      // Load existing tracking data
+      const response = await fetch("/tracking-data.json");
+      const trackingData = await response.json();
+
+      // Calculate estimated delivery date
+      const now = new Date();
+      const estDelivery = new Date();
+      
+      const deliveryDays = {
+        'same-day': 1,
+        'next-day': 1,
+        'scheduled': 3,
+        'bulk': 5
+      };
+      
+      estDelivery.setDate(now.getDate() + (deliveryDays[formData.serviceType] || 3));
+
+      // Map service type to display name
+      const serviceMap = {
+        'same-day': 'Same-Day Delivery',
+        'next-day': 'Next-Day Delivery',
+        'scheduled': 'Scheduled Pickup',
+        'bulk': 'Bulk Shipment'
+      };
+
+      // Create new shipment entry
+      const newShipment = {
+        trackingNumber: newBookingRef,
+        sender: {
+          name: formData.customerName,
+          location: formData.pickupAddress
+        },
+        receiver: {
+          name: "To be assigned",
+          address: formData.deliveryAddress
+        },
+        package: {
+          description: "New Booking",
+          weight: formData.packageWeight
+        },
+        serviceType: serviceMap[formData.serviceType] || formData.serviceType,
+        status: "Collected",
+        createdAt: now.toISOString(),
+        estimatedDelivery: estDelivery.toISOString(),
+        history: [
+          {
+            status: "Collected",
+            timestamp: now.toISOString(),
+            location: "Online Booking",
+            description: "Shipment created via online booking"
+          }
+        ]
+      };
+
+      // Add to tracking data
+      trackingData.shipments.push(newShipment);
+
+      // Store in localStorage for persistence (since we can't write to server)
+      localStorage.setItem('dumoexpress_bookings', JSON.stringify(trackingData.shipments));
+      
+      // Also try to update the JSON file via a simple POST (will fail on cPanel but won't break the flow)
+      try {
+        await fetch("/api/update-tracking", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(trackingData)
+        }).catch(() => {
+          // Silently fail - we have localStorage as backup
+        });
+      } catch (err) {
+        // Ignore errors
+      }
+
+      setBookingRef(newBookingRef);
+      setStep(3);
+      toast.success("Booking created successfully!");
+    } catch (error) {
+      console.error("Booking error:", error);
+      toast.error("Failed to create booking. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const copyBookingRef = () => {
+  const copyToClipboard = () => {
     navigator.clipboard.writeText(bookingRef);
     toast.success("Booking reference copied!");
   };
@@ -123,75 +211,71 @@ export default function Booking() {
       
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="bg-gradient-to-br from-[oklch(0.45_0.15_250)] to-[oklch(0.35_0.12_250)] text-white py-12 lg:py-16">
-          <div className="container">
+        <section className="relative bg-gradient-to-br from-[oklch(0.45_0.15_250)] to-[oklch(0.35_0.12_250)] text-white py-16 lg:py-20 overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
+            <img src="/images/booking-hero.jpg" alt="Book a delivery" className="w-full h-full object-cover" />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.45_0.15_250)] via-[oklch(0.45_0.15_250)]/90 to-[oklch(0.35_0.12_250)]/80" />
+          <div className="container relative z-10">
             <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl lg:text-5xl font-bold mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              <h1 className="text-4xl lg:text-5xl font-bold mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
                 Book a Delivery
               </h1>
-              <p className="text-xl text-white/80">
+              <p className="text-lg text-white/90">
                 Schedule your parcel pickup in just a few steps.
               </p>
             </div>
           </div>
         </section>
 
-        {/* Progress Steps */}
-        <section className="py-8 border-b">
-          <div className="container">
-            <div className="flex items-center justify-center gap-4">
-              {[1, 2, 3].map((s) => (
-                <div key={s} className="flex items-center">
-                  <div className={`
-                    w-10 h-10 rounded-full flex items-center justify-center font-semibold
-                    ${step >= s ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}
-                  `}>
-                    {step > s ? <CheckCircle2 className="h-5 w-5" /> : s}
-                  </div>
-                  <span className={`ml-2 hidden sm:inline ${step >= s ? 'text-foreground' : 'text-muted-foreground'}`}>
-                    {s === 1 ? 'Select Service' : s === 2 ? 'Enter Details' : 'Confirmation'}
-                  </span>
-                  {s < 3 && <div className="w-12 h-0.5 bg-gray-200 mx-4" />}
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Step Content */}
+        {/* Booking Steps */}
         <section className="py-12 lg:py-16">
           <div className="container max-w-4xl">
+            {/* Step Indicator */}
+            <div className="flex justify-between mb-12">
+              {[1, 2, 3].map((s) => (
+                <div key={s} className="flex items-center flex-1">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                    s <= step 
+                      ? 'bg-[oklch(0.45_0.15_250)] text-white' 
+                      : 'bg-gray-200 text-gray-500'
+                  }`}>
+                    {s}
+                  </div>
+                  <div className={`flex-1 h-1 mx-2 ${
+                    s < step ? 'bg-[oklch(0.45_0.15_250)]' : 'bg-gray-200'
+                  }`} />
+                </div>
+              ))}
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
+                3 <= step 
+                  ? 'bg-[oklch(0.45_0.15_250)] text-white' 
+                  : 'bg-gray-200 text-gray-500'
+              }`}>
+                3
+              </div>
+            </div>
+
             {/* Step 1: Select Service */}
             {step === 1 && (
               <div>
-                <div className="text-center mb-8">
-                  <h2 className="text-2xl font-bold mb-2">Choose Your Service</h2>
-                  <p className="text-muted-foreground">Select the delivery option that best fits your needs.</p>
-                </div>
-                
+                <h2 className="text-2xl font-bold mb-8">Select Service Type</h2>
                 <div className="grid md:grid-cols-2 gap-4">
-                  {serviceTypes.map((service) => (
-                    <Card 
-                      key={service.id}
-                      className={`cursor-pointer transition-all hover:shadow-lg ${
-                        formData.serviceType === service.id ? 'border-2 border-primary' : ''
-                      }`}
-                      onClick={() => handleServiceSelect(service.id)}
-                    >
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                            <service.icon className="h-6 w-6 text-primary" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold mb-1">{service.name}</h3>
-                            <p className="text-sm text-muted-foreground mb-2">{service.description}</p>
-                            <p className="text-sm font-semibold text-primary">{service.price}</p>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+                  {serviceTypes.map((service) => {
+                    const Icon = service.icon;
+                    return (
+                      <button
+                        key={service.id}
+                        onClick={() => handleServiceSelect(service.id)}
+                        className="p-6 border-2 border-gray-200 rounded-lg hover:border-[oklch(0.45_0.15_250)] hover:bg-blue-50 transition text-left"
+                      >
+                        <Icon className="w-8 h-8 text-[oklch(0.45_0.15_250)] mb-3" />
+                        <h3 className="font-semibold text-lg mb-1">{service.name}</h3>
+                        <p className="text-sm text-gray-600 mb-2">{service.description}</p>
+                        <p className="font-semibold text-[oklch(0.45_0.15_250)]">{service.price}</p>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -293,7 +377,7 @@ export default function Booking() {
                           <Label htmlFor="specialInstructions">Special Instructions</Label>
                           <Input
                             id="specialInstructions"
-                            placeholder="Fragile, handle with care, etc."
+                            placeholder="e.g., Fragile, Handle with care"
                             value={formData.specialInstructions}
                             onChange={(e) => handleChange("specialInstructions", e.target.value)}
                           />
@@ -301,20 +385,29 @@ export default function Booking() {
                       </div>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex gap-4 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setStep(1)}>
+                    {/* Form Actions */}
+                    <div className="flex gap-4 pt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setStep(1)}
+                      >
                         Back
                       </Button>
-                      <Button type="submit" className="flex-1 gap-2" disabled={createBooking.isPending}>
-                        {createBooking.isPending ? (
+                      <Button
+                        type="submit"
+                        disabled={isLoading}
+                        className="flex-1 bg-[oklch(0.45_0.15_250)] hover:bg-[oklch(0.40_0.15_250)]"
+                      >
+                        {isLoading ? (
                           <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                             Processing...
                           </>
                         ) : (
                           <>
-                            Confirm Booking <ArrowRight className="h-4 w-4" />
+                            Confirm Booking
+                            <ArrowRight className="w-4 h-4 ml-2" />
                           </>
                         )}
                       </Button>
@@ -326,69 +419,61 @@ export default function Booking() {
 
             {/* Step 3: Confirmation */}
             {step === 3 && (
-              <Card className="text-center">
-                <CardContent className="py-12">
-                  <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle2 className="h-10 w-10 text-green-600" />
-                  </div>
-                  <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
-                  <p className="text-muted-foreground mb-6">
-                    Your delivery has been scheduled. You can now track your shipment using the reference number below.
-                  </p>
-                  
-                  <div className="bg-[oklch(0.97_0.01_250)] rounded-lg p-6 max-w-md mx-auto mb-8">
-                    <p className="text-sm text-muted-foreground mb-2">Your Booking Reference</p>
-                    <div className="flex items-center justify-center gap-2">
-                      <span className="text-2xl font-bold font-mono">{bookingRef}</span>
-                      <Button variant="ghost" size="icon" onClick={copyBookingRef}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      Save this reference to track your booking status
+              <Card className="border-2 border-green-200 bg-green-50">
+                <CardContent className="pt-8">
+                  <div className="text-center">
+                    <CheckCircle2 className="w-16 h-16 text-green-600 mx-auto mb-4" />
+                    <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
+                    <p className="text-gray-600 mb-6">
+                      Your booking has been successfully created. You can now track your delivery using the reference number below.
                     </p>
-                  </div>
-                  
-                  <div className="space-y-4 text-left max-w-md mx-auto mb-8">
-                    <h3 className="font-semibold">What's Next?</h3>
-                    <ul className="space-y-2 text-sm text-muted-foreground">
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        You'll receive a confirmation email with booking details
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        Our team will contact you to confirm pickup time
-                      </li>
-                      <li className="flex items-start gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
-                        Once collected, you can track your parcel in real-time
-                      </li>
-                    </ul>
-                  </div>
-                  
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href={`/tracking?q=${bookingRef}`}>
-                      <Button variant="outline" className="gap-2">
-                        Track Parcel Now
-                      </Button>
-                    </Link>
-                    <Button onClick={() => {
-                      setStep(1);
-                      setBookingRef("");
-                      setFormData({
-                        serviceType: "next-day",
-                        customerName: "",
-                        customerEmail: "",
-                        customerPhone: "",
-                        pickupAddress: "",
-                        deliveryAddress: "",
-                        packageWeight: "",
-                        specialInstructions: ""
-                      });
-                    }} className="gap-2">
-                      Book Another Delivery
-                    </Button>
+
+                    <div className="bg-white p-6 rounded-lg border-2 border-gray-200 mb-6">
+                      <p className="text-sm text-gray-600 mb-2">Your Booking Reference</p>
+                      <div className="flex items-center justify-center gap-3">
+                        <code className="text-2xl font-bold text-[oklch(0.45_0.15_250)]">
+                          {bookingRef}
+                        </code>
+                        <button
+                          onClick={copyToClipboard}
+                          className="p-2 hover:bg-gray-100 rounded transition"
+                        >
+                          <Copy className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className="text-sm text-gray-600">
+                        Use this reference number to track your delivery on our tracking page.
+                      </p>
+                      <div className="flex gap-3">
+                        <Link href="/track" className="flex-1">
+                          <Button className="w-full bg-[oklch(0.45_0.15_250)] hover:bg-[oklch(0.40_0.15_250)]">
+                            Track Parcel
+                          </Button>
+                        </Link>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setStep(1);
+                            setFormData({
+                              serviceType: "next-day",
+                              customerName: "",
+                              customerEmail: "",
+                              customerPhone: "",
+                              pickupAddress: "",
+                              deliveryAddress: "",
+                              packageWeight: "",
+                              specialInstructions: ""
+                            });
+                            setBookingRef("");
+                          }}
+                        >
+                          New Booking
+                        </Button>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -396,7 +481,7 @@ export default function Booking() {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );

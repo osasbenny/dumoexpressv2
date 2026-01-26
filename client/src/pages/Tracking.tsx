@@ -86,6 +86,20 @@ export default function Tracking() {
       try {
         const response = await fetch("/tracking-data.json");
         const data = await response.json();
+        
+        // Also load bookings from localStorage
+        const localBookings = localStorage.getItem('dumoexpress_bookings');
+        if (localBookings) {
+          try {
+            const bookings = JSON.parse(localBookings);
+            const trackingNumbers = new Set(data.shipments.map((s: any) => s.trackingNumber));
+            const newBookings = bookings.filter((b: any) => !trackingNumbers.has(b.trackingNumber));
+            data.shipments = [...data.shipments, ...newBookings];
+          } catch (e) {
+            console.error("Failed to parse localStorage bookings:", e);
+          }
+        }
+        
         setTrackingData(data);
       } catch (err) {
         console.error("Failed to load tracking data:", err);
