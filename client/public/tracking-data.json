@@ -83,6 +83,33 @@
           "description": "Parcel is out for local delivery"
         }
       ]
+    },
+    {
+      "trackingNumber": "BKXKINJEZJ",
+      "sender": {
+        "name": "john",
+        "location": "146nn"
+      },
+      "receiver": {
+        "name": "To be assigned",
+        "address": "u24571"
+      },
+      "package": {
+        "description": "New Booking",
+        "weight": "Up to 1 kg"
+      },
+      "serviceType": "Next-Day Delivery",
+      "status": "Collected",
+      "createdAt": "2026-01-26T11:11:30.451Z",
+      "estimatedDelivery": "2026-01-29T11:11:30.451Z",
+      "history": [
+        {
+          "status": "Collected",
+          "timestamp": "2026-01-26T11:11:30.451Z",
+          "location": "Online Booking",
+          "description": "Shipment created via online booking"
+        }
+      ]
     }
   ]
 }
