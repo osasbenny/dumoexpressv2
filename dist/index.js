@@ -215,7 +215,7 @@ async function getAllParcels() {
 }
 async function createBooking(booking) {
   const db = await getDb();
-  const bookingRef = `BK${nanoid(8).toUpperCase()}`;
+  const bookingRef = `DE${nanoid(13).toUpperCase()}`;
   if (db) {
     try {
       await db.insert(bookings).values({ ...booking, bookingRef });
