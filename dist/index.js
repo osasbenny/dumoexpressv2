@@ -102,6 +102,8 @@ var ENV = {
 
 // server/db.ts
 import { nanoid } from "nanoid";
+import fs from "fs";
+import path from "path";
 var _db = null;
 async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
@@ -213,9 +215,68 @@ async function getAllParcels() {
 }
 async function createBooking(booking) {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
   const bookingRef = `BK${nanoid(8).toUpperCase()}`;
-  await db.insert(bookings).values({ ...booking, bookingRef });
+  if (db) {
+    try {
+      await db.insert(bookings).values({ ...booking, bookingRef });
+    } catch (error) {
+      console.error("[Database] Failed to save booking:", error);
+    }
+  }
+  try {
+    const trackingDataPath = path.resolve(process.cwd(), "client", "public", "tracking-data.json");
+    const distTrackingDataPath = path.resolve(process.cwd(), "dist", "public", "tracking-data.json");
+    let data = { shipments: [] };
+    if (fs.existsSync(trackingDataPath)) {
+      const content = fs.readFileSync(trackingDataPath, "utf-8");
+      data = JSON.parse(content);
+    }
+    const serviceMap = {
+      "same-day": "Same-Day Delivery",
+      "next-day": "Next-Day Delivery",
+      "scheduled": "Scheduled Pickup",
+      "bulk": "Bulk Shipment"
+    };
+    const now = /* @__PURE__ */ new Date();
+    const estDelivery = /* @__PURE__ */ new Date();
+    estDelivery.setDate(now.getDate() + 3);
+    const newShipment = {
+      trackingNumber: bookingRef,
+      sender: {
+        name: booking.customerName,
+        location: booking.pickupAddress
+      },
+      receiver: {
+        name: "To be assigned",
+        address: booking.deliveryAddress
+      },
+      package: {
+        description: "New Booking",
+        weight: booking.packageWeight
+      },
+      serviceType: serviceMap[booking.serviceType] || booking.serviceType,
+      status: "Collected",
+      createdAt: now.toISOString(),
+      estimatedDelivery: estDelivery.toISOString(),
+      history: [
+        {
+          status: "Collected",
+          timestamp: now.toISOString(),
+          location: "Online Booking",
+          description: "Shipment created via online booking"
+        }
+      ]
+    };
+    data.shipments.push(newShipment);
+    const updatedContent = JSON.stringify(data, null, 2);
+    fs.writeFileSync(trackingDataPath, updatedContent);
+    if (fs.existsSync(path.dirname(distTrackingDataPath))) {
+      fs.writeFileSync(distTrackingDataPath, updatedContent);
+    }
+    console.log(`[Storage] Booking ${bookingRef} saved to tracking-data.json`);
+  } catch (error) {
+    console.error("[Storage] Failed to save to tracking-data.json:", error);
+  }
   return bookingRef;
 }
 async function getBookingByRef(bookingRef) {
@@ -981,16 +1042,16 @@ async function createContext(opts) {
 
 // server/_core/vite.ts
 import express from "express";
-import fs from "fs";
+import fs2 from "fs";
 import { nanoid as nanoid2 } from "nanoid";
-import path2 from "path";
+import path3 from "path";
 import { createServer as createViteServer } from "vite";
 
 // vite.config.ts
 import { jsxLocPlugin } from "@builder.io/vite-plugin-jsx-loc";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import path2 from "path";
 import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 var plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
@@ -998,16 +1059,16 @@ var vite_config_default = defineConfig({
   plugins,
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets")
+      "@": path2.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path2.resolve(import.meta.dirname, "shared"),
+      "@assets": path2.resolve(import.meta.dirname, "attached_assets")
     }
   },
-  envDir: path.resolve(import.meta.dirname),
-  root: path.resolve(import.meta.dirname, "client"),
-  publicDir: path.resolve(import.meta.dirname, "client", "public"),
+  envDir: path2.resolve(import.meta.dirname),
+  root: path2.resolve(import.meta.dirname, "client"),
+  publicDir: path2.resolve(import.meta.dirname, "client", "public"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path2.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true
   },
   server: {
@@ -1045,13 +1106,13 @@ async function setupVite(app, server) {
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     try {
-      const clientTemplate = path2.resolve(
+      const clientTemplate = path3.resolve(
         import.meta.dirname,
         "../..",
         "client",
         "index.html"
       );
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      let template = await fs2.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid2()}"`
@@ -1065,15 +1126,15 @@ async function setupVite(app, server) {
   });
 }
 function serveStatic(app) {
-  const distPath = process.env.NODE_ENV === "development" ? path2.resolve(import.meta.dirname, "../..", "dist", "public") : path2.resolve(import.meta.dirname, "public");
-  if (!fs.existsSync(distPath)) {
+  const distPath = process.env.NODE_ENV === "development" ? path3.resolve(import.meta.dirname, "../..", "dist", "public") : path3.resolve(import.meta.dirname, "public");
+  if (!fs2.existsSync(distPath)) {
     console.error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
   app.use(express.static(distPath));
   app.use("*", (_req, res) => {
-    res.sendFile(path2.resolve(distPath, "index.html"));
+    res.sendFile(path3.resolve(distPath, "index.html"));
   });
 }
 

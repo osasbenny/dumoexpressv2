@@ -341,7 +341,7 @@ export default function Booking() {
                   </div>
                   <h2 className="text-2xl font-bold mb-2">Booking Confirmed!</h2>
                   <p className="text-muted-foreground mb-6">
-                    Your delivery has been scheduled. We'll contact you shortly to confirm pickup details.
+                    Your delivery has been scheduled. You can now track your shipment using the reference number below.
                   </p>
                   
                   <div className="bg-[oklch(0.97_0.01_250)] rounded-lg p-6 max-w-md mx-auto mb-8">
@@ -376,9 +376,9 @@ export default function Booking() {
                   </div>
                   
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Link href="/tracking">
+                    <Link href={`/tracking?q=${bookingRef}`}>
                       <Button variant="outline" className="gap-2">
-                        Track Parcel
+                        Track Parcel Now
                       </Button>
                     </Link>
                     <Button onClick={() => {

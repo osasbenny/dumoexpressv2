@@ -9,6 +9,8 @@ import {
 } from "../drizzle/schema";
 import { ENV } from './_core/env';
 import { nanoid } from 'nanoid';
+import fs from 'fs';
+import path from 'path';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
@@ -161,10 +163,83 @@ export async function getAllParcels(): Promise<Parcel[]> {
 
 export async function createBooking(booking: Omit<InsertBooking, 'bookingRef'>): Promise<string> {
   const db = await getDb();
-  if (!db) throw new Error("Database not available");
   
   const bookingRef = `BK${nanoid(8).toUpperCase()}`;
-  await db.insert(bookings).values({ ...booking, bookingRef });
+  
+  // Save to database if available
+  if (db) {
+    try {
+      await db.insert(bookings).values({ ...booking, bookingRef });
+    } catch (error) {
+      console.error("[Database] Failed to save booking:", error);
+    }
+  }
+
+  // Also save to tracking-data.json for cPanel/Static deployment compatibility
+  try {
+    const trackingDataPath = path.resolve(process.cwd(), 'client', 'public', 'tracking-data.json');
+    const distTrackingDataPath = path.resolve(process.cwd(), 'dist', 'public', 'tracking-data.json');
+    
+    let data = { shipments: [] };
+    if (fs.existsSync(trackingDataPath)) {
+      const content = fs.readFileSync(trackingDataPath, 'utf-8');
+      data = JSON.parse(content);
+    }
+
+    // Map service type to display name
+    const serviceMap = {
+      'same-day': 'Same-Day Delivery',
+      'next-day': 'Next-Day Delivery',
+      'scheduled': 'Scheduled Pickup',
+      'bulk': 'Bulk Shipment'
+    };
+
+    const now = new Date();
+    const estDelivery = new Date();
+    estDelivery.setDate(now.getDate() + 3); // Default 3 days delivery
+
+    const newShipment = {
+      trackingNumber: bookingRef,
+      sender: {
+        name: booking.customerName,
+        location: booking.pickupAddress
+      },
+      receiver: {
+        name: "To be assigned",
+        address: booking.deliveryAddress
+      },
+      package: {
+        description: "New Booking",
+        weight: booking.packageWeight
+      },
+      serviceType: serviceMap[booking.serviceType as keyof typeof serviceMap] || booking.serviceType,
+      status: "Collected",
+      createdAt: now.toISOString(),
+      estimatedDelivery: estDelivery.toISOString(),
+      history: [
+        {
+          status: "Collected",
+          timestamp: now.toISOString(),
+          location: "Online Booking",
+          description: "Shipment created via online booking"
+        }
+      ]
+    };
+
+    data.shipments.push(newShipment as any);
+    
+    const updatedContent = JSON.stringify(data, null, 2);
+    fs.writeFileSync(trackingDataPath, updatedContent);
+    
+    // Also update dist if it exists (for immediate preview)
+    if (fs.existsSync(path.dirname(distTrackingDataPath))) {
+      fs.writeFileSync(distTrackingDataPath, updatedContent);
+    }
+    
+    console.log(`[Storage] Booking ${bookingRef} saved to tracking-data.json`);
+  } catch (error) {
+    console.error("[Storage] Failed to save to tracking-data.json:", error);
+  }
   
   return bookingRef;
 }
