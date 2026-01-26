@@ -8,7 +8,7 @@
       },
       "receiver": {
         "name": "Mohammed Al-Rashid",
-        "address": "Dubai Marina, UAE"
+        "location": "Dubai Marina, UAE"
       },
       "package": {
         "description": "Electronics Package",
@@ -61,18 +61,18 @@
       },
       "serviceType": "48hrs",
       "status": "Collected",
-      "createdAt": "2024-01-19T10:00:00Z",
-      "estimatedDelivery": "2024-01-21T18:00:00Z",
+      "createdAt": "2026-01-23T10:00:00Z",
+      "estimatedDelivery": "2026-01-26T18:00:00Z",
       "history": [
         {
           "status": "Collected",
-          "timestamp": "2024-01-19T10:30:00Z",
+          "timestamp": "2026-01-23T10:30:00Z",
           "location": "Mediterranean Collection Point",
           "description": "Parcel collected from sender at Mediterranean Sea location"
         },
         {
           "status": "In Transit",
-          "timestamp": "2024-01-19T15:00:00Z",
+          "timestamp": "2026-01-23T15:00:00Z",
           "location": "Regional Hub - Europe",
           "description": "Parcel sorted and prepared for international shipment"
         }
