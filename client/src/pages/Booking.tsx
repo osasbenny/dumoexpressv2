@@ -232,8 +232,8 @@ export default function Booking() {
         <section className="py-12 lg:py-16">
           <div className="container max-w-4xl">
             {/* Step Indicator */}
-            <div className="flex justify-between mb-12">
-              {[1, 2, 3].map((s) => (
+            <div className="flex justify-between items-center mb-12">
+              {[1, 2, 3].map((s, index) => (
                 <div key={s} className="flex items-center flex-1">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
                     s <= step 
@@ -242,18 +242,13 @@ export default function Booking() {
                   }`}>
                     {s}
                   </div>
-                  <div className={`flex-1 h-1 mx-2 ${
-                    s < step ? 'bg-[oklch(0.45_0.15_250)]' : 'bg-gray-200'
-                  }`} />
+                  {index < 2 && (
+                    <div className={`flex-1 h-1 mx-2 ${
+                      s < step ? 'bg-[oklch(0.45_0.15_250)]' : 'bg-gray-200'
+                    }`} />
+                  )}
                 </div>
               ))}
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg ${
-                3 <= step 
-                  ? 'bg-[oklch(0.45_0.15_250)] text-white' 
-                  : 'bg-gray-200 text-gray-500'
-              }`}>
-                3
-              </div>
             </div>
 
             {/* Step 1: Select Service */}
@@ -448,7 +443,7 @@ export default function Booking() {
                         Use this reference number to track your delivery on our tracking page.
                       </p>
                       <div className="flex gap-3">
-                        <Link href="/track" className="flex-1">
+                        <Link href="/tracking" className="flex-1">
                           <Button className="w-full bg-[oklch(0.45_0.15_250)] hover:bg-[oklch(0.40_0.15_250)]">
                             Track Parcel
                           </Button>
