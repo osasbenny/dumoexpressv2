@@ -103,6 +103,38 @@
           "description": "Shipment created via online booking"
         }
       ]
+    },
+    {
+      "trackingNumber": "DESKIO4ITN9",
+      "sender": {
+        "name": "Kathleen Furlong",
+        "phone": "506-566-4450",
+        "email": "kathyfurlong@hotmail.com",
+        "address": "108 Maclaren BLVD, Saint John, NB Canada"
+      },
+      "receiver": {
+        "name": "Dr David Lee Skeen",
+        "email": "skeenleedavid988@gmail.com",
+        "address": "48 Main St, Woodstock, NB E7M 1H7, Canada"
+      },
+      "package": {
+        "description": "Household Items and Furniture: Washer and dryer, Deep freezer, TV stand, Table and Chairs, Queen size bed, Dresser, Computer chair, Around 10 totes (containers), A couple end tables, Clothes and blankets and towels, Garbage cans and shelves, mop, broom etc.",
+        "weight": "Multiple items"
+      },
+      "serviceType": "48hrs Door Step Delivery",
+      "status": "Out To Collect The Shipment",
+      "deliveryFee": "$750",
+      "paymentStatus": "Pending",
+      "createdAt": "2026-02-10T08:00:00Z",
+      "estimatedDelivery": "2026-02-12T18:00:00Z",
+      "history": [
+        {
+          "status": "Out To Collect The Shipment",
+          "timestamp": "2026-02-10T08:00:00Z",
+          "location": "Saint John, NB",
+          "description": "Shipment collection scheduled from Kathleen Furlong's property"
+        }
+      ]
     }
   ]
 }
