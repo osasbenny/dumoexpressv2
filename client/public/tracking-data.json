@@ -59,7 +59,7 @@
         "description": "Sealed Carton"
       },
       "serviceType": "Delivery to Door Step",
-      "status": "In Transit",
+      "status": "Out for Delivery",
       "createdAt": "2026-01-23T10:00:00Z",
       "estimatedDelivery": "2026-02-07T18:00:00Z",
       "history": [
@@ -122,7 +122,7 @@
         "weight": "Multiple items"
       },
       "serviceType": "48hrs Door Step Delivery",
-      "status": "Out To Collect The Shipment",
+      "status": "Collected",
       "deliveryFee": "$750",
       "paymentStatus": "Pending",
       "createdAt": "2026-02-10T08:00:00Z",
