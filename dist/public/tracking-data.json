@@ -74,6 +74,12 @@
           "timestamp": "2026-01-24T15:00:00Z",
           "location": "Portugal Office",
           "description": "Parcel in transit at Portugal Office"
+        },
+        {
+          "status": "Out for Delivery",
+          "timestamp": "2026-02-10T08:00:00Z",
+          "location": "Canada Distribution Center",
+          "description": "Parcel out for delivery in Canada"
         }
       ]
     },
