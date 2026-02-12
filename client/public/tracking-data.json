@@ -135,10 +135,10 @@
       "estimatedDelivery": "2026-02-12T18:00:00Z",
       "history": [
         {
-          "status": "Out To Collect The Shipment",
+          "status": "Collected",
           "timestamp": "2026-02-10T08:00:00Z",
           "location": "Saint John, NB",
-          "description": "Shipment collection scheduled from Kathleen Furlong's property"
+          "description": "Shipment collected from Kathleen Furlong's property"
         }
       ]
     }
