@@ -128,17 +128,17 @@
         "weight": "Multiple items"
       },
       "serviceType": "48hrs Door Step Delivery",
-      "status": "Collected",
+      "status": "Booked",
       "deliveryFee": "$750",
       "paymentStatus": "Pending",
       "createdAt": "2026-02-10T08:00:00Z",
-      "estimatedDelivery": "2026-02-12T18:00:00Z",
+      "estimatedDelivery": "2026-02-19T18:00:00Z",
       "history": [
         {
-          "status": "Collected",
+          "status": "Booked",
           "timestamp": "2026-02-10T08:00:00Z",
           "location": "Saint John, NB",
-          "description": "Shipment collected from Kathleen Furlong's property"
+          "description": "Shipment booked for collection from Kathleen Furlong's property"
         }
       ]
     }
